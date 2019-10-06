@@ -108,7 +108,7 @@ OBJFOLDER=obj
 ifeq ($(OSNAME),LINUX)
 	CXXFLAGS+=-fPIC
 	# static version of the libraries if compiled LIBRARIES+=-Ldependencies/$(OSNAME)/$(ARCHNAME) -lpthread -lboost_system -lboost_thread -lboost_program_options -lboost_unit_test_framework -luhd -lboost_serialization -lboost_filesystem  -lboost_date_time -lboost_regex -lrt
-	LIBRARIES+=-lboost_thread -lboost_program_options -luhd
+	LIBRARIES+=-L/home/talos/gnuradio/lib -lboost_thread -lboost_program_options -luhd
 else ifeq ($(OSNAME),MAC)
 	CXXFLAGS+=-fPIC
 	LIBRARIES+=-lboost_thread-mt -lboost_program_options-mt -lboost_system-mt -luhd
