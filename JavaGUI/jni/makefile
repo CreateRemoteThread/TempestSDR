@@ -136,7 +136,9 @@ $(OBJFOLDER)/%.o : %.c $(DEPS)
 
 # Generate the java header based on the class
 TSDRLibraryNDK.h : ../bin/martin/tempest/core/TSDRLibrary.class 
-	javah -classpath ../bin -o TSDRLibraryNDK.h -jni martin.tempest.core.TSDRLibrary
+	javac -cp ../bin -h . ../src/martin/tempest/core/TSDRLibrary.java
+	# javac -cp ../bin -h . ../bin/martin/tempest/core/TSDRLibrary.java
+	mv martin_tempest_core_TSDRLibrary.h TSDRLibraryNDK.h
 
 # If the class is not compiled, do it
 ../bin/martin/tempest/core/TSDRLibrary.class  : ../src/martin/tempest/core/TSDRLibrary.java

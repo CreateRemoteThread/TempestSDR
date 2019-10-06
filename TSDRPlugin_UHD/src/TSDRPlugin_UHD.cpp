@@ -329,10 +329,10 @@ EXTERNC TSDRPLUGIN_API int __stdcall tsdrplugin_readasync(tsdrplugin_readasync_f
 
 		usrp->issue_stream_cmd(uhd::stream_cmd_t::STREAM_MODE_STOP_CONTINUOUS);
 
-		// flush usrpbuffer
-	    while(rx_stream->recv(
+	  // fix from https://github.com/j-helen/USRP-Receiver/blob/e4d845f1bfc5f0cafa1e89d612cf6b2714d46ca0/usrp_src.cpp  
+    while(rx_stream->recv(
 	        buff, samples_per_api_read, md,
-	        uhd::device::RECV_MODE_ONE_PACKET
+	        0.1,true
 	    )){
 	        /* NOP */
 	    };
