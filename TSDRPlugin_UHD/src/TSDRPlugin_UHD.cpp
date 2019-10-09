@@ -33,6 +33,17 @@ uhd::usrp::multi_usrp::sptr usrp;
 namespace po = boost::program_options;
 volatile int is_running = 0;
 
+double tousrpgain(float gain) {
+	try {
+		uhd::gain_range_t range = usrp->get_rx_gain_range();
+		return gain * (range.stop() - range.start()) + range.start();
+	}
+	catch (std::exception const&  ex)
+	{
+		return gain * 60;
+	}
+}
+
 EXTERNC TSDRPLUGIN_API void __stdcall tsdrplugin_getName(char * name) {
 	strcpy(name, "TSDR UHD USRP Compatible Plugin");
 }
@@ -51,72 +62,102 @@ uint32_t req_freq = 105e6;
 float req_gain = 1;
 double req_rate = 25e6;
 
+int UHD_SAFE_MAIN(int argc, char *argv[])
+{
+  tsdrplugin_init("lol");
+  return 0;
+}
+
 EXTERNC TSDRPLUGIN_API int __stdcall tsdrplugin_init(const char * params) {
     uhd::set_thread_priority_safe();
+	// simulate argv and argc
+	std::string sparams(params);
 
-  try{
-    std::string device_args("");
-    std::string subdev("A:A");
-    std::string ant("TX/RX");
-    std::string ref("internal");
+	typedef std::vector< std::string > split_vector_type;
 
-    double rate(1e6);
-    double freq(915e6);
-    double gain(10);
-    double bw(1e6);
+	split_vector_type argscounter;
+	boost::split( argscounter, sparams, boost::is_any_of(" "), boost::token_compress_on );
 
-    //create a usrp device
-    std::cout << std::endl;
-    std::cout << boost::format("Creating the usrp device with: %s...") % device_args << std::endl;
-    usrp = uhd::usrp::multi_usrp::make(device_args);
+	const int argc = argscounter.size()+1;
+	char ** argv = (char **) malloc(argc*sizeof(char *));
+	char zerothtarg[] = "TSDRPlugin_UHD";
+	argv[0] = (char *) zerothtarg;
+	for (int i = 0; i < argc-1; i++)
+		argv[i+1] = (char *) argscounter[i].c_str();
 
-    // Lock mboard clocks
-    std::cout << boost::format("Lock mboard clocks: %f") % ref << std::endl;
-    usrp->set_clock_source(ref);
-    
-    //always select the subdevice first, the channel mapping affects the other settings
-    std::cout << boost::format("subdev set to: %f") % subdev << std::endl;
-    usrp->set_rx_subdev_spec(subdev);
+	//variables to be set by po
+	std::string args, file, ant, subdev, ref, tsrc;
+	double bw;
 
-    //     std::cout << boost::format("Using Device: %s") % usrp->get_pp_string() << std::endl;
+	//setup the program options
+	po::options_description desc("Allowed options");
+	desc.add_options()
+			("args", po::value<std::string>(&args)->default_value(""), "multi uhd device address args")
+			("ant", po::value<std::string>(&ant), "daughterboard antenna selection")
+			("rate", po::value<double>(&req_rate)->default_value(req_rate), "rate of incoming samples")
+			("subdev", po::value<std::string>(&subdev), "daughterboard subdevice specification")
+			("bw", po::value<double>(&bw), "daughterboard IF filter bandwidth in Hz")
+			("ref", po::value<std::string>(&ref)->default_value("internal"), "waveform type (internal, external, mimo)")
+			("tsrc", po::value<std::string>(&tsrc)->default_value("external"), "time source (none, external, _external_, mimo)") ;
 
-    //set the sample rate
-    if (rate <= 0.0) {
-        std::cerr << "Please specify a valid sample rate" << std::endl;
-        return ~0;
-    }
-
-    // set sample rate
-    std::cout << boost::format("Setting RX Rate: %f Msps...") % (rate / 1e6) << std::endl;
-    usrp->set_rx_rate(rate);
-    std::cout << boost::format("Actual RX Rate: %f Msps...") % (usrp->get_rx_rate() / 1e6) << std::endl << std::endl;
-
-    // set freq
-    std::cout << boost::format("Setting RX Freq: %f MHz...") % (freq / 1e6) << std::endl;
-    uhd::tune_request_t tune_request(freq);
-    usrp->set_rx_freq(tune_request);
-    std::cout << boost::format("Actual RX Freq: %f MHz...") % (usrp->get_rx_freq() / 1e6) << std::endl << std::endl;
-
-    // set the rf gain
-    std::cout << boost::format("Setting RX Gain: %f dB...") % gain << std::endl;
-    usrp->set_rx_gain(gain);
-    std::cout << boost::format("Actual RX Gain: %f dB...") % usrp->get_rx_gain() << std::endl << std::endl;
-
-    // set the IF filter bandwidth
-    std::cout << boost::format("Setting RX Bandwidth: %f MHz...") % (bw / 1e6) << std::endl;
-    usrp->set_rx_bandwidth(bw);
-    std::cout << boost::format("Actual RX Bandwidth: %f MHz...") % (usrp->get_rx_bandwidth() / 1e6) << std::endl << std::endl;
-
-    // set the antenna
-    std::cout << boost::format("Setting RX Antenna: %s") % ant << std::endl;
-    usrp->set_rx_antenna(ant);
-    std::cout << boost::format("Actual RX Antenna: %s") % usrp->get_rx_antenna() << std::endl << std::endl;
-  }
-  catch (std::exception const&  ex)
+	po::variables_map vm;
+	try {
+		po::store(po::parse_command_line(argc, argv, desc), vm);
+		po::notify(vm);
+	} catch (std::exception const&  ex)
 	{
+		std::string msg(boost::str(boost::format("Error: %s\n\nTSDRPlugin_UHD %s") % ex.what() % desc));
+		RETURN_EXCEPTION(msg.c_str(), TSDR_PLUGIN_PARAMETERS_WRONG);
+	}
+
+	try {
+		//create a usrp device
+		usrp = uhd::usrp::multi_usrp::make(args);
+
+		//Lock mboard clocks
+		usrp->set_clock_source(ref);
+		if (vm.count("tsrc")) usrp->set_time_source(tsrc);
+
+		usrp->set_rx_rate(req_rate);
+		req_rate = usrp->get_rx_rate();
+
+		//set the rx center frequency
+		usrp->set_rx_freq(req_freq);
+
+		//set the rx rf gain
+		usrp->set_rx_gain(tousrpgain(req_gain));
+		//set the antenna
+		if (vm.count("ant")) usrp->set_rx_antenna(ant);
+
+		//set the IF filter bandwidth
+		if (vm.count("bw"))
+			usrp->set_rx_bandwidth(bw);
+
+		boost::this_thread::sleep(boost::posix_time::seconds(1)); //allow for some setup time
+
+		//Check Ref and LO Lock detect
+		std::vector<std::string> rx_sensor_names;
+		rx_sensor_names = usrp->get_rx_sensor_names(0);
+		if (std::find(rx_sensor_names.begin(), rx_sensor_names.end(), "lo_locked") != rx_sensor_names.end()) {
+			uhd::sensor_value_t lo_locked = usrp->get_rx_sensor("lo_locked",0);
+			UHD_ASSERT_THROW(lo_locked.to_bool());
+		}
+		std::vector<std::string>  sensor_names = usrp->get_mboard_sensor_names(0);
+		if ((ref == "mimo") and (std::find(sensor_names.begin(), sensor_names.end(), "mimo_locked") != sensor_names.end())) {
+			uhd::sensor_value_t mimo_locked = usrp->get_mboard_sensor("mimo_locked",0);
+			UHD_ASSERT_THROW(mimo_locked.to_bool());
+		}
+		if ((ref == "external") and (std::find(sensor_names.begin(), sensor_names.end(), "ref_locked") != sensor_names.end())) {
+			uhd::sensor_value_t ref_locked = usrp->get_mboard_sensor("ref_locked",0);
+			UHD_ASSERT_THROW(ref_locked.to_bool());
+		}
+	} catch (std::exception const&  ex)
+	{
+		free(argv);
 		RETURN_EXCEPTION(ex.what(), TSDR_CANNOT_OPEN_DEVICE);
 	}
 
+	free(argv);
 	RETURN_OK();
 
 	return 0; // to avoid getting warning from stupid Eclpse
@@ -172,19 +213,6 @@ EXTERNC TSDRPLUGIN_API int __stdcall tsdrplugin_stop(void) {
 	RETURN_OK();
 
 	return 0; // to avoid getting warning from stupid Eclpse
-}
-
-double tousrpgain(float gain)
-{
-  try
-  {
-    uhd::gain_range_t range = usrp->get_tx_gain_range();
-    return gain * (range.stop() - range.start()) + range.start();
-  }
-  catch(std::exception const& ex)
-  {
-    return gain *60;
-  }
 }
 
 EXTERNC TSDRPLUGIN_API int __stdcall tsdrplugin_setgain(float gain) {
