@@ -72,6 +72,7 @@ EXTERNC TSDRPLUGIN_API int __stdcall tsdrplugin_init(const char * params) {
     uhd::set_thread_priority_safe();
 	// simulate argv and argc
 	std::string sparams(params);
+  // printf("%s\n",params);
 
 	typedef std::vector< std::string > split_vector_type;
 
@@ -118,9 +119,12 @@ EXTERNC TSDRPLUGIN_API int __stdcall tsdrplugin_init(const char * params) {
 		usrp->set_clock_source(ref);
 		if (vm.count("tsrc")) usrp->set_time_source(tsrc);
 
+    printf("Requested SampleRate: %d\n",req_rate);
 		usrp->set_rx_rate(req_rate);
 		req_rate = usrp->get_rx_rate();
+    printf("Retrieved SampleRate: %d\n",req_rate);
 
+    printf("Requested Center Frequency: %d\n",req_freq);
 		//set the rx center frequency
 		usrp->set_rx_freq(req_freq);
 
@@ -165,7 +169,12 @@ EXTERNC TSDRPLUGIN_API int __stdcall tsdrplugin_init(const char * params) {
 
 EXTERNC TSDRPLUGIN_API uint32_t __stdcall tsdrplugin_setsamplerate(uint32_t rate) {
 	if (is_running)
+  {
+    printf("Trying to set sample rate on running USRP\n");
 		return tsdrplugin_getsamplerate();
+  }
+
+  printf("Requesting rate via plugin %d\n",rate);
 
 	req_rate = rate;
 

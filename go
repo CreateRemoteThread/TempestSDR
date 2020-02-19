@@ -1,3 +1,3 @@
 #!/bin/sh
 
-java -jar JavaGUI/JTempestSDR.jar
+nice -n 0 java -jar JavaGUI/JTempestSDR.jar
