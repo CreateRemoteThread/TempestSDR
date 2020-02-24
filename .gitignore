@@ -1,3 +1,5 @@
+autocorr*.csv
+
 *.pydevproject
 .metadata
 .gradle
