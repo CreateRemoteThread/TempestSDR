@@ -133,7 +133,7 @@ public class ImageVisualizer extends JPanel {
 			drawFPS(g);
 			drawOSD(g);
 		} else {
-			g.setColor(Color.BLUE);
+			g.setColor(Color.BLACK);
 			g.fillRect(0, 0, getWidth(), getHeight());
 		}
 	}
@@ -155,7 +155,7 @@ public class ImageVisualizer extends JPanel {
 	
 	private void drawOSD(Graphics g) {
 		if (OSD != null && !OSD.isEmpty()) {
-			g.setColor(Color.green);
+			g.setColor(Color.RED);
 			final Font original = g.getFont();
 			g.setFont(default_osd_font);
 			g.drawString(OSD, 5, current_osd_height);

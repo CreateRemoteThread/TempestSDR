@@ -122,7 +122,7 @@ public class Main implements TSDRLibrary.FrameReadyCallback, TSDRLibrary.Incomin
 	private ImageVisualizer visualizer;
 	private PlotVisualizer line_plotter, frame_plotter;
 	private AutoScaleVisualizer autoScaleVisualizer;
-	//private SNRVisualizer snrLevelVisualizer; to enable snr start by uncommenting this
+	private SNRVisualizer snrLevelVisualizer;
 	private Rectangle visualizer_bounds;
 	private double framerate = 25;
 	private JTextField txtFramerate;
@@ -205,7 +205,7 @@ public class Main implements TSDRLibrary.FrameReadyCallback, TSDRLibrary.Incomin
 		frmTempestSdr.setFocusableWindowState(true);
 		frmTempestSdr.addKeyListener(keyhook);
 		frmTempestSdr.setResizable(false);
-		frmTempestSdr.setTitle("TempestSDR");
+		frmTempestSdr.setTitle("Jimmy's Combination Seafood Laksa");
 		frmTempestSdr.setBounds(100, 100, 810, 632);
 		frmTempestSdr.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmTempestSdr.addMouseListener(new MouseAdapter() {
@@ -243,7 +243,7 @@ public class Main implements TSDRLibrary.FrameReadyCallback, TSDRLibrary.Incomin
 		});
 		frmTempestSdr.getContentPane().setLayout(null);
 		frmTempestSdr.getContentPane().add(visualizer);
-		
+
 		line_plotter = new PlotVisualizer(height_transformer);
 		line_plotter.setBounds(10, 498, 727, 95);
 		frmTempestSdr.getContentPane().add(line_plotter);
@@ -275,8 +275,8 @@ public class Main implements TSDRLibrary.FrameReadyCallback, TSDRLibrary.Incomin
 		spFrequency.setModel(frequency_spinner_model);
 		frmTempestSdr.getContentPane().add(spFrequency);
 		framerate = framerate_initial;
-		
-		frame_plotter = new PlotVisualizer(fps_transofmer);
+
+		frame_plotter = new PlotVisualizer(fps_transformer);
 		frame_plotter.setBounds(10, 391, 727, 95);
 		frmTempestSdr.getContentPane().add(frame_plotter);
 		frame_plotter.setSelectedValue(framerate);
@@ -595,7 +595,9 @@ public class Main implements TSDRLibrary.FrameReadyCallback, TSDRLibrary.Incomin
 				tglbtnSuperBandwidth.setBounds(765, 278, 25, 22);
 				tglbtnSuperBandwidth.setParaChangeCallback(this);
 				frmTempestSdr.getContentPane().add(tglbtnSuperBandwidth);
-				
+		    snrLevelVisualizer = new SNRVisualizer();
+		    snrLevelVisualizer.setBounds(540, 33, 25, 346);
+		    // frmTempestSdr.getContentPane().add(snrLevelVisualizer);
 				autoScaleVisualizer = new AutoScaleVisualizer();
 				autoScaleVisualizer.setBounds(540, 33, 25, 346);
 				frmTempestSdr.getContentPane().add(autoScaleVisualizer);
@@ -707,10 +709,7 @@ public class Main implements TSDRLibrary.FrameReadyCallback, TSDRLibrary.Incomin
 		setAreaAroundMouse();
 		
 		visualizer.setRenderingQualityHigh(chckbxmntmHighQualityRendering.isSelected());
-		
-		//snrLevelVisualizer = new SNRVisualizer();
-		//snrLevelVisualizer.setBounds(10, 33, 25, 346);
-		//frmTempestSdr.getContentPane().add(snrLevelVisualizer);
+		System.out.println("Enabling SNR Visualizer Comonent, 10, 33, 25, 346");
 		
 		tglbtnDmp = new JToggleButton("DMP");
 		tglbtnDmp.addActionListener(new ActionListener() {
@@ -1211,7 +1210,8 @@ public class Main implements TSDRLibrary.FrameReadyCallback, TSDRLibrary.Incomin
 			autoScaleVisualizer.setValue(arg0, arg1);
 			break;
 		case SNR:
-			//snrLevelVisualizer.setSNRValue(arg0);
+      System.out.println("Received SNR Sample");
+			snrLevelVisualizer.setSNRValue(arg0);
 			break;
 		case AUTOCORRECT_DUMPED:
 			tglbtnDmp.setSelected(false);
@@ -1249,7 +1249,7 @@ public class Main implements TSDRLibrary.FrameReadyCallback, TSDRLibrary.Incomin
 				assert(samplerate == line_plotter.getSamplerate());
 
 				if (frame_plotter.getSamplerate() == samplerate) {
-					final double fps = fps_transofmer.fromIndex(auto_resolution_fps_id, auto_resolution_fps_offset, samplerate);
+					final double fps = fps_transformer.fromIndex(auto_resolution_fps_id, auto_resolution_fps_offset, samplerate);
 					final int height = roundData(height_transformer.fromIndexAndLength(line_plotter.getMaxIndex(), line_plotter.getOffset(), samplerate, auto_resolution_fps_id+auto_resolution_fps_offset));
 				
 					final Long key = hashHeightAndFPS(fps, height);
@@ -1292,7 +1292,7 @@ public class Main implements TSDRLibrary.FrameReadyCallback, TSDRLibrary.Incomin
 		}
 	}
 	
-	private final TransformerAndCallback fps_transofmer = new TransformerAndCallback() {
+	private final TransformerAndCallback fps_transformer = new TransformerAndCallback() {
 		
 		@Override
 		public String getDescription(final double val, final int id) { return String.format("%.1f fps", val); }

@@ -89,6 +89,8 @@ ifeq ($(OSNAME),WINDOWS)
 PLUGINS += TSDRPlugin_Mirics TSDRPlugin_ExtIO
 else ifeq ($(OSNAME), LINUX)
 PLUGINS += TSDRPlugin_UHD
+PLUGINS += TSDRPlugin_librtlsdr
+PLUGINS += TSDRPlugin_HackRF
 else ifeq ($(OSNAME), MAC)
 PLUGINS += TSDRPlugin_UHD
 endif

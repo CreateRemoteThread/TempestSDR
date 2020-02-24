@@ -60,7 +60,7 @@ double bw(1e6);
 
 uint32_t req_freq = 105e6;
 float req_gain = 1;
-double req_rate = 25e6;
+double req_rate = 20e6;
 
 int UHD_SAFE_MAIN(int argc, char *argv[])
 {

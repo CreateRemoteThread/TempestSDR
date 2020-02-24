@@ -39,6 +39,8 @@ public class TSDRSource {
 		new TSDRFileSource(),
 		new TSDRMiricsSource(),
 		new TSDRUHDSource(),
+    new TSDRlibrtlsdrSource(),
+    new TSDRHackRFSource(),
 		new TSDRExtIOSource(),
 	};
 	

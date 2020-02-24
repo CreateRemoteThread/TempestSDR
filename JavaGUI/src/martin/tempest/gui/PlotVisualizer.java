@@ -370,7 +370,7 @@ public class PlotVisualizer extends JPanel {
 					g.drawLine(x, (int) (visdata[x]), x, nheight);
 
 			} else {
-				g.setColor(Color.blue);
+				g.setColor(Color.BLACK);
 				g.fillRect(0, 0, nwidth, nheight);
 				return;
 			}
@@ -399,7 +399,7 @@ public class PlotVisualizer extends JPanel {
 			if (index_selected != null) {
 
 				if (index_selected >= 0 || index_selected < size) {
-					g.setColor(Color.green);
+					g.setColor(Color.RED);
 
 					final int x = scale_x.value_to_pixel_absolute( index_selected ) + size_of_val_in_px / 2;
 
