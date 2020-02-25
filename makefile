@@ -24,6 +24,9 @@ endif
 # Make all
 all :
 	@$(MAKE) -C TSDRPlugin_RawFile/ all JAVA_HOME=$(JAVA_HOME)
+	@$(MAKE) -C TSDRPlugin_librtlsdr/ all JAVA_HOME=$(JAVA_HOME)
+	@$(MAKE) -C TSDRPlugin_HackRF/ all JAVA_HOME=$(JAVA_HOME)
+	@$(MAKE) -C TSDRPlugin_TCP/ all JAVA_HOME=$(JAVA_HOME)
 ifeq ($(OSNAME),WINDOWS)
 	@$(MAKE) -C TSDRPlugin_Mirics/ all MIRICS_HOME=$(MIRICS_HOME)
 	@$(MAKE) -C TSDRPlugin_ExtIO/ all MIRICS_HOME=$(MIRICS_HOME)
@@ -33,6 +36,9 @@ endif
 
 # Clean artifacts
 clean :
+	@$(MAKE) -C TSDRPlugin_librtlsdr/ clean
+	@$(MAKE) -C TSDRPlugin_HackRF/ clean
+	@$(MAKE) -C TSDRPlugin_TCP/ clean
 	@$(MAKE) -C TSDRPlugin_RawFile/ clean
 	@$(MAKE) -C TSDRPlugin_Mirics/ clean
 	@$(MAKE) -C TSDRPlugin_ExtIO/ clean

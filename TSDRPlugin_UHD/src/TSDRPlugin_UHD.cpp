@@ -60,7 +60,7 @@ double bw(1e6);
 
 uint32_t req_freq = 105e6;
 float req_gain = 1;
-double req_rate = 20e6;
+double req_rate = 10e6;
 
 int UHD_SAFE_MAIN(int argc, char *argv[])
 {
@@ -119,12 +119,12 @@ EXTERNC TSDRPLUGIN_API int __stdcall tsdrplugin_init(const char * params) {
 		usrp->set_clock_source(ref);
 		if (vm.count("tsrc")) usrp->set_time_source(tsrc);
 
-    printf("Requested SampleRate: %d\n",req_rate);
+    printf("Requested SampleRate: %lf\n",req_rate);
 		usrp->set_rx_rate(req_rate);
 		req_rate = usrp->get_rx_rate();
-    printf("Retrieved SampleRate: %d\n",req_rate);
+    printf("Retrieved SampleRate: %lf\n",req_rate);
 
-    printf("Requested Center Frequency: %d\n",req_freq);
+    printf("Requested Center Frequency: %lu\n",req_freq);
 		//set the rx center frequency
 		usrp->set_rx_freq(req_freq);
 
@@ -174,7 +174,7 @@ EXTERNC TSDRPLUGIN_API uint32_t __stdcall tsdrplugin_setsamplerate(uint32_t rate
 		return tsdrplugin_getsamplerate();
   }
 
-  printf("Requesting rate via plugin %d\n",rate);
+  printf("Requesting rate via plugin %lu\n",rate);
 
 	req_rate = rate;
 
@@ -204,6 +204,7 @@ EXTERNC TSDRPLUGIN_API uint32_t __stdcall tsdrplugin_getsamplerate() {
 
 EXTERNC TSDRPLUGIN_API int __stdcall tsdrplugin_setbasefreq(uint32_t freq) {
 	req_freq = freq;
+  printf("Requesting %lu center freq via plugin api\n",freq);
 
 	try {
 		usrp->set_rx_freq(req_freq);

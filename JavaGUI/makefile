@@ -88,6 +88,7 @@ ifeq ($(OSNAME),WINDOWS)
 # Windows only plugins
 PLUGINS += TSDRPlugin_Mirics TSDRPlugin_ExtIO
 else ifeq ($(OSNAME), LINUX)
+PLUGINS += TSDRPlugin_TCP
 PLUGINS += TSDRPlugin_UHD
 PLUGINS += TSDRPlugin_librtlsdr
 PLUGINS += TSDRPlugin_HackRF

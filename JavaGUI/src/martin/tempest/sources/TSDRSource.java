@@ -39,6 +39,7 @@ public class TSDRSource {
 		new TSDRFileSource(),
 		new TSDRMiricsSource(),
 		new TSDRUHDSource(),
+		new TSDRTCPSource(),
     new TSDRlibrtlsdrSource(),
     new TSDRHackRFSource(),
 		new TSDRExtIOSource(),
