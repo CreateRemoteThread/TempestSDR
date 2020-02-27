@@ -262,6 +262,13 @@ void read_async(float *buf, int width, int height, void *ctx) {
 	(*jvm)->DetachCurrentThread(jvm);
 }
 
+JNIEXPORT void JNICALL Java_martin_tempest_core_TSDRLibrary_databusXmit(JNIEnv * env, jobject obj, jstring params){
+  if (tsdr_instance == NULL) return;
+	const char *nparams = (*env)->GetStringUTFChars(env, params, 0);
+	int status = tsdr_databusXmit(tsdr_instance, nparams);
+  
+}
+
 JNIEXPORT void JNICALL Java_martin_tempest_core_TSDRLibrary_loadPlugin (JNIEnv * env, jobject obj, jstring path, jstring params) {
 	if (tsdr_instance == NULL) return;
 

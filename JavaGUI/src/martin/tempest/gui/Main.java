@@ -126,6 +126,7 @@ public class Main implements TSDRLibrary.FrameReadyCallback, TSDRLibrary.Incomin
 	private Rectangle visualizer_bounds;
 	private double framerate = 25;
 	private JTextField txtFramerate;
+	private JTextField txtDatabus;
 	private HoldButton btnLowerFramerate, btnHigherFramerate, btnUp, btnDown, btnLeft, btnRight;
 	private JPanel pnInputDeviceSettings;
 	private ParametersToggleButton tglbtnAutoPosition, tglbtnPllFramerate, tglbtnAutocorrPlots, tglbtnSuperBandwidth;
@@ -206,7 +207,8 @@ public class Main implements TSDRLibrary.FrameReadyCallback, TSDRLibrary.Incomin
 		frmTempestSdr.addKeyListener(keyhook);
 		frmTempestSdr.setResizable(false);
 		frmTempestSdr.setTitle("Jimmy's Combination Seafood Laksa");
-		frmTempestSdr.setBounds(100, 100, 810, 632);
+		// frmTempestSdr.setBounds(100, 100, 810, 632);
+		frmTempestSdr.setBounds(100, 100, 810, 632 + 40);
 		frmTempestSdr.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmTempestSdr.addMouseListener(new MouseAdapter() {
 			@Override
@@ -312,6 +314,18 @@ public class Main implements TSDRLibrary.FrameReadyCallback, TSDRLibrary.Incomin
 			}
 		});
 		mnFile.add(exit);
+
+    JMenu mnDatabus = new JMenu("Data Bus");
+		menuBar.add(mnDatabus);
+    JMenuItem mnDatabus_Xmit = new JMenuItem("Transmit");
+    mnDatabus_Xmit.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        databusXmit();
+        // System.exit(0);
+      }
+    });
+    mnDatabus.add(mnDatabus_Xmit);
 		
 		mnTweaks = new JMenu("Tweaks");
 		menuBar.add(mnTweaks);
@@ -475,6 +489,12 @@ public class Main implements TSDRLibrary.FrameReadyCallback, TSDRLibrary.Incomin
 				tglbtnAutocorrPlots.setToolTipText("Turn off autocorrelation plots");
 				tglbtnAutocorrPlots.setParaChangeCallback(this);
 				tglbtnAutocorrPlots.setMargin(new Insets(0, 0, 0, 0));
+
+				txtDatabus = new JTextField();
+				txtDatabus.setBounds(10, 600, 780, 25);
+		    frmTempestSdr.getContentPane().setLayout(null);
+				frmTempestSdr.getContentPane().add(txtDatabus);
+        txtDatabus.setText("FOR OFFICIAL USE ONLY");
 				
 				txtFramerate = new JTextField();
 				txtFramerate.setBounds(651, 151, 102, 22);
@@ -747,6 +767,17 @@ public class Main implements TSDRLibrary.FrameReadyCallback, TSDRLibrary.Incomin
 			prefs.putInt(PREF_AREA_AROUND_MOUSE, area_around_mouse);
 		} catch (Throwable t) {};
 	}
+
+  private void databusXmit()
+  {
+    try{
+		mSdrlib.databusXmit(txtDatabus.getText());
+		} catch (TSDRException e1) {
+		onException(mSdrlib, e1);
+    }
+    // System.out.println(txtDatabus.getText());
+    return;
+  }
 	
 	private void performStartStop() {
 		

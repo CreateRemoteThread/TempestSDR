@@ -59,6 +59,8 @@ struct tsdr_context {
 #define RETURN_OK(tsdr) {tsdr->errormsg_code = TSDR_OK; return TSDR_OK;}
 #define RETURN_PLUGIN_RESULT(tsdr,plugin,result) {if ((result) == TSDR_OK) RETURN_OK(tsdr) else RETURN_EXCEPTION(tsdr,plugin.tsdrplugin_getlasterrortext(),result);}
 
+int extra_header = 0;
+
 void tsdr_init(tsdr_lib_t ** tsdr, tsdr_value_changed_callback callback, tsdr_on_plot_ready_callback plotready_callback, void * ctx) {
 	int i;
 
@@ -374,7 +376,7 @@ void postprocessingthread(void * ctx) {
 
 		const int width = context->this->width;
 		const int height = context->this->height;
-		const int totalpixels = width * height;
+		const int totalpixels = width * height + extra_header;
 
 		if (width != oldwidth || height != oldheight) {
 			oldwidth = width;
@@ -432,6 +434,34 @@ int tsdr_unloadplugin(tsdr_lib_t * tsdr) {
 	RETURN_OK(tsdr);
 
 	return 0; // to avoid getting warning from stupid Eclpse
+}
+
+int tsdr_databusXmit(tsdr_lib_t *tsdr, const char * params)
+{
+  printf("tsdr_databusXmit called with '%s', tokenizing...\n",params);
+  char *token = strtok(params," ");
+  while(token != NULL)
+  {
+    if(strcasecmp(token,"extra_header") == 0)
+    {
+      token = strtok(NULL," "); 
+      sscanf(token,"%d",&extra_header);
+      printf("Special sauce: setting extra_header to %d\n",extra_header);
+    }
+    else if(strcasecmp(token,"ping") == 0)
+    {
+      token = strtok(NULL," "); 
+      printf("Special sauce: PONG %s\n",token);
+    }
+    else
+    {
+      printf("Unknown token, stopping: %s\n",token);
+      break;
+    }
+    token = strtok(NULL," ");
+  }
+  RETURN_OK(tsdr);
+  return 0;
 }
 
 int tsdr_loadplugin(tsdr_lib_t * tsdr, const char * pluginfilepath, const char * params) {

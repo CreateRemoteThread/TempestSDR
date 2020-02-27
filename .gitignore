@@ -1,5 +1,7 @@
 autocorr*.csv
 
+hs_err*.log
+
 *.pydevproject
 .metadata
 .gradle

@@ -84,10 +84,12 @@ void TSDRPLUGIN_API __stdcall tsdrplugin_getName(char * name) {
 }
 
 uint32_t TSDRPLUGIN_API __stdcall tsdrplugin_setsamplerate(uint32_t rate) {
+  printf("TCP Source: Requested sample rate %ul\n",rate);
 	return samplerate;
 }
 
 uint32_t TSDRPLUGIN_API __stdcall tsdrplugin_getsamplerate() {
+  printf("TCP Source: Fetching sample rate %ul\n",samplerate);
 	return samplerate;
 }
 
@@ -108,13 +110,11 @@ int TSDRPLUGIN_API __stdcall tsdrplugin_setgain(float gain) {
 }
 
 int TSDRPLUGIN_API __stdcall tsdrplugin_init(const char * params) {
-  char *fname = "~/lol.raw";
   type = TYPE_FLOAT;
-  sizepersample = 4;
+  sizepersample = 6;
  
-  printf("TCP Source: tsdrplugin_init called\n");
+  printf("TCP Source: tsdrplugin_init called with parameters '%s'\n",params);
  
-	strcpy(filename, fname);
 	samplerate = (uint32_t) 8000000;
 
 	RETURN_OK();
@@ -152,11 +152,10 @@ int TSDRPLUGIN_API __stdcall tsdrplugin_readasync(tsdrplugin_readasync_function 
     return 0; 
   }
 
-  if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) 
-  { 
-    printf("TCP Source: readasync: connect failed\n"); 
-		RETURN_EXCEPTION("Plugin was not initialized properly.", TSDR_PLUGIN_PARAMETERS_WRONG);
-    return 0; 
+  while (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) 
+  {
+    printf("TCP Source: readasync: connect failed, back off and retry...\n"); 
+    sleep(3);
   } 
   
   printf("TCP Source: ready to read!\n");

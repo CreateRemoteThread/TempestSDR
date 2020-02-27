@@ -256,6 +256,7 @@ public class TSDRLibrary {
 	public native void setInvertedColors(boolean invertedEnabled);
 	public native void sync(int pixels, SYNC_DIRECTION dir);
 	public native void setParam(PARAM param, long value) throws TSDRException;
+	public native void databusXmit(String x) throws TSDRException;
 	public native void setParamDouble(PARAM_DOUBLE param, double value) throws TSDRException;
 	public native void setResolution(int height, double refreshrate) throws TSDRException;
 	public native void setMotionBlur(float gain) throws TSDRException;
